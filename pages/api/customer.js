@@ -26,20 +26,42 @@ export default function handler(req, res) {
         async function getCustomerData() {
             const query = `
             {
-            customer(id: "gid://shopify/Customer/1753015910478") {
+            customer(id: "${req.body.id}") {
               id
               tags
               displayName
               ordersCount
+              orders(first: 10) {
+                  edges {
+                      node {
+                          lineItems(first: 2) {
+                              edges {
+                                  node {
+                                      product {
+                                          title
+                                          tags
+                                      }
+                                      quantity
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
             }
           }
           `
 
             const response = await ShopifyData(query)
-            const allcustomers = response.data.customer ? response.data.customer : []
-            console.log("All", allcustomers)
-            res.status(200).json({ allcustomers })
-            return allcustomers
+            const current_customer = response.data.customer ? response.data.customer : []            
+            if(current_customer.tags.includes("Member")){
+                var customer_total_orders = current_customer.orders.edges;
+                customer_total_orders.forEach(element => {
+                    console.log(element.node.lineItems.edges)
+                });
+            }
+            res.status(200).json({ current_customer })
+            return current_customer
         }
         const user = getCustomerData()
         console.log("users", user)
