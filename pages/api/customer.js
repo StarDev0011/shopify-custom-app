@@ -51,14 +51,18 @@ export default function handler(req, res) {
             }
           }
           `
-
             const response = await ShopifyData(query)
             const current_customer = response.data.customer ? response.data.customer : []            
             if(current_customer.tags.includes("Member")){
                 var customer_total_orders = current_customer.orders.edges;
+                var product_count = 0;
                 customer_total_orders.forEach(element => {
-                    console.log(element.node.lineItems.edges)
+                    if(element.node.lineItems.edges[0].node.product.tags.includes("Class")) {
+                        product_count = product_count + parseInt(element.node.lineItems.edges[0].node.quantity);
+                       
+                    }
                 });
+                console.log(product_count)
             }
             res.status(200).json({ current_customer })
             return current_customer
