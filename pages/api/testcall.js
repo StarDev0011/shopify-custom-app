@@ -55,6 +55,7 @@ export default function handler(req, res) {
             const response = await ShopifyData(query)
             const current_customer = response.data.customer ? response.data.customer : []
             var customer_tags = current_customer.tags;
+           
             if(current_customer.tags.includes("Member")){
                 var customer_total_orders = current_customer.orders.edges;
                 var product_count = 0;
@@ -64,19 +65,19 @@ export default function handler(req, res) {
                     }
                 });
                 var updated_order_num = product_count % 6;
-                console.log(updated_order_num)
+                
                 if(updated_order_num == 5) {
-                    customer_tags.push("zero_available");
+                    customer_tags.push("free_available");
                 }
                 else {
-                    if(customer_tags.includes("zero_available")) {
+                    if(customer_tags.includes("free_available")) {
                         customer_tags.pop();
                     }
                 }
 
                 const query2 = `
                     mutation {
-                        customerUpdate(input: {id: "${req.body.id}", tags: "${customer_tags}"}) {
+                        customerUpdate(input: {id: "${req.body.id}", tags: ["07-13-2021, Member"]}) {
                         customer {
                             id
                             tags
@@ -88,8 +89,9 @@ export default function handler(req, res) {
                 const current_customers = response2.data
                 console.log(current_customers)
                 console.log(customer_tags)
-                res.status(200).json({ current_customer })
+                
             }
+            res.status(200).json({ current_customer })
             return current_customer
         }
         const user = getCustomerData()
