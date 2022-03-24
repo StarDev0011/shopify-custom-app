@@ -61,6 +61,7 @@ export default function handler(req, res) {
                 var product_count = 0;
                 customer_total_orders.forEach(element => {
                     if(element.node.createdAt.indexOf("2022") != -1){
+                        console.log(element.node.createdAt)
                         if(element.node.lineItems.edges[0].node.product.tags.includes("Class")) {
                             product_count = product_count + parseInt(element.node.lineItems.edges[0].node.quantity);                       
                         }
@@ -90,6 +91,9 @@ export default function handler(req, res) {
                 const response2 = await ShopifyData(query2)
                 const current_customers = response2.data
                 res.status(200).send(updated_order_num)
+            }
+            else {
+                res.status(200).send("0")
             }
             return current_customer
         }
