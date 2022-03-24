@@ -34,6 +34,7 @@ export default function handler(req, res) {
               orders(first: 10) {
                   edges {
                       node {
+                          createdAt
                           lineItems(first: 2) {
                               edges {
                                   node {
@@ -59,9 +60,11 @@ export default function handler(req, res) {
                 var customer_total_orders = current_customer.orders.edges;
                 var product_count = 0;
                 customer_total_orders.forEach(element => {
-                    if(element.node.lineItems.edges[0].node.product.tags.includes("Class")) {
-                        product_count = product_count + parseInt(element.node.lineItems.edges[0].node.quantity);                       
-                    }
+                    if(element.node.createdAt.indexOf("2022") != -1){
+                        if(element.node.lineItems.edges[0].node.product.tags.includes("Class")) {
+                            product_count = product_count + parseInt(element.node.lineItems.edges[0].node.quantity);                       
+                        }
+                    }                    
                 });
                 var updated_order_num = product_count % 6;
                 console.log(updated_order_num)
@@ -86,8 +89,6 @@ export default function handler(req, res) {
                     `
                 const response2 = await ShopifyData(query2)
                 const current_customers = response2.data
-                console.log(current_customers)
-                console.log(customer_tags)
                 res.status(200).json({ current_customer })
             }
             return current_customer
