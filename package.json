@@ -13,7 +13,6 @@
     "@shopify/app-bridge": "^2.0.21",
     "@shopify/app-bridge-react": "^2.0.21",
     "@shopify/app-bridge-utils": "^2.0.21",
-    "@shopify/polaris": "^9.2.3",
     "apollo-boost": "^0.4.9",
     "next": "12.1.0",
     "react": "17.0.2",
