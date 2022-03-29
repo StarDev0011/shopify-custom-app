@@ -90,7 +90,7 @@ export default function handler(req, res) {
                     `
                 const response2 = await ShopifyData(query2)
                 const current_customers = response2.data
-                res.status(200).send(updated_order_num)
+                res.status(200).json({current_customer})
             }
             else {
                 res.status(200).send("0")
