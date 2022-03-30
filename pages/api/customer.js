@@ -103,22 +103,22 @@ export default async function handler(req, res) {
             else {
                 res.status(200).send("0")
             }
-            let user_data = {
-                customer_id: current_customer.id,
-                name: current_customer.displayName,
-                counter: updated_order_num,
-                total: product_count,
-                available: available
-            }
-            const user_table = await db
-                .collection("shopify_customers").findOne({ customer_id: user_data.customer_id }, (err, user) => {
-                    if (!user) {
-                        db.collection("shopify_customers").insertMany([user_data]);
-                    }
-                    else {
-                        db.collection("shopify_customers").updateOne({ customer_id: user_data.customer_id }, [{ $set: { counter: user_data.counter } }, { $set: { total: user_data.total } }]);
-                    }
-                });
+            // let user_data = {
+            //     customer_id: current_customer.id,
+            //     name: current_customer.displayName,
+            //     counter: updated_order_num,
+            //     total: product_count,
+            //     available: available
+            // }
+            // const user_table = await db
+            //     .collection("shopify_customers").findOne({ customer_id: user_data.customer_id }, (err, user) => {
+            //         if (!user) {
+            //             db.collection("shopify_customers").insertMany([user_data]);
+            //         }
+            //         else {
+            //             db.collection("shopify_customers").updateOne({ customer_id: user_data.customer_id }, [{ $set: { counter: user_data.counter } }, { $set: { total: user_data.total } }]);
+            //         }
+            //     });
             return current_customer
         }
         const user = getCustomerData()
