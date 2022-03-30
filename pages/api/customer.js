@@ -1,5 +1,9 @@
-export default function handler(req, res) {
+import { connectToDatabase } from "../../lib/mongodb"
+
+export default async function handler(req, res) {
     if (req.method === 'POST') {
+        const {db} = await connectToDatabase();
+
         async function ShopifyData(query) {
             const URL = `https://cac-prototype.myshopify.com/admin/api/2022-01/graphql.json`
             const options = {
@@ -56,9 +60,11 @@ export default function handler(req, res) {
             const response = await ShopifyData(query)
             const current_customer = response.data.customer ? response.data.customer : []
             var customer_tags = current_customer.tags;
+            var available = "Not Available";
             if(current_customer.tags.includes("Member")){
                 var customer_total_orders = current_customer.orders.edges;
                 var product_count = 0;
+                available = "Member"
                 customer_total_orders.forEach(element => {
                     if(element.node.createdAt.indexOf("2022") != -1){
                         console.log(element.node.createdAt)
@@ -90,11 +96,28 @@ export default function handler(req, res) {
                     `
                 const response2 = await ShopifyData(query2)
                 const current_customers = response2.data
-                res.status(200).json({current_customer})
+                let user_data = {
+                    customer_id: current_customer.id,
+                    name:current_customer.displayName,
+                    counter: updated_order_num,
+                    total: product_count,
+                    available: available
+                }
+                const user_table = await db
+                .collection("shopify_customers").findOne({customer_id:user_data.customer_id}, (err,user)=>{
+                    if(!user){
+                        db.collection("shopify_customers").insertMany([user_data]);
+                    }
+                    else {
+                        db.collection("shopify_customers").updateOne({customer_id: user_data.customer_id},[{$set: {counter:user_data.counter}}, {$set: {total:user_data.total}}]);
+                    }
+                });
+                res.status(200).send(updated_order_num)
             }
             else {
                 res.status(200).send("0")
             }
+            
             return current_customer
         }
         const user = getCustomerData()
