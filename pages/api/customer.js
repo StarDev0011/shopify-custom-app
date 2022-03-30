@@ -31,7 +31,7 @@ export default function handler(req, res) {
               tags
               displayName
               ordersCount
-              orders(first: 10) {
+              orders(first: 50) {
                   edges {
                       node {
                           createdAt
@@ -56,9 +56,12 @@ export default function handler(req, res) {
             const response = await ShopifyData(query)
             const current_customer = response.data.customer ? response.data.customer : []
             var customer_tags = current_customer.tags;
+            var available = "Not Available";
+            var customer_total_orders = current_customer.orders.edges;
+            var product_count = 0;
+            var updated_order_num = 0;
             if(current_customer.tags.includes("Member")){
-                var customer_total_orders = current_customer.orders.edges;
-                var product_count = 0;
+                available = "Member";
                 customer_total_orders.forEach(element => {
                     if(element.node.createdAt.indexOf("2022") != -1){
                         console.log(element.node.createdAt)
@@ -67,7 +70,7 @@ export default function handler(req, res) {
                         }
                     }                    
                 });
-                var updated_order_num = product_count % 6;
+                updated_order_num = product_count % 6;
                 console.log(updated_order_num)
                 if(updated_order_num == 5) {
                     customer_tags.push("zero_available");
