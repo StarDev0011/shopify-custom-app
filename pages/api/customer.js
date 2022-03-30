@@ -1,11 +1,7 @@
-import { connectToDatabase } from "../../lib/mongodb"
-
-export default async function handler(req, res) {
+export default function handler(req, res) {
     if (req.method === 'POST') {
-        const { db } = await connectToDatabase();
-
         async function ShopifyData(query) {
-            const URL = process.env.SERVER_URL
+            const URL = `https://cac-prototype.myshopify.com/admin/api/2022-01/graphql.json`
             const options = {
                 endpoint: URL,
                 method: "POST",
@@ -35,7 +31,7 @@ export default async function handler(req, res) {
               tags
               displayName
               ordersCount
-              orders(first: 50) {
+              orders(first: 10) {
                   edges {
                       node {
                           createdAt
@@ -60,27 +56,24 @@ export default async function handler(req, res) {
             const response = await ShopifyData(query)
             const current_customer = response.data.customer ? response.data.customer : []
             var customer_tags = current_customer.tags;
-            var available = "Not Available";
-            var customer_total_orders = current_customer.orders.edges;
-            var product_count = 0;
-            var updated_order_num = 0;
-            if (current_customer.tags.includes("Member")) {
-                available = "Member"
+            if(current_customer.tags.includes("Member")){
+                var customer_total_orders = current_customer.orders.edges;
+                var product_count = 0;
                 customer_total_orders.forEach(element => {
-                    if (element.node.createdAt.indexOf("2022") != -1) {
+                    if(element.node.createdAt.indexOf("2022") != -1){
                         console.log(element.node.createdAt)
-                        if (element.node.lineItems.edges[0].node.product.tags.includes("Class")) {
-                            product_count = product_count + parseInt(element.node.lineItems.edges[0].node.quantity);
+                        if(element.node.lineItems.edges[0].node.product.tags.includes("Class")) {
+                            product_count = product_count + parseInt(element.node.lineItems.edges[0].node.quantity);                       
                         }
-                    }
+                    }                    
                 });
-                updated_order_num = product_count % 6;
+                var updated_order_num = product_count % 6;
                 console.log(updated_order_num)
-                if (updated_order_num == 5) {
+                if(updated_order_num == 5) {
                     customer_tags.push("zero_available");
                 }
                 else {
-                    if (customer_tags.includes("zero_available")) {
+                    if(customer_tags.includes("zero_available")) {
                         customer_tags.pop();
                     }
                 }
@@ -97,28 +90,11 @@ export default async function handler(req, res) {
                     `
                 const response2 = await ShopifyData(query2)
                 const current_customers = response2.data
-
                 res.status(200).send(updated_order_num)
             }
             else {
                 res.status(200).send("0")
             }
-            let user_data = {
-                customer_id: current_customer.id,
-                name: current_customer.displayName,
-                counter: updated_order_num,
-                total: product_count,
-                available: available
-            }
-            const user_table = await db
-                .collection("shopify_customers").findOne({ customer_id: user_data.customer_id }, (err, user) => {
-                    if (!user) {
-                        db.collection("shopify_customers").insertMany([user_data]);
-                    }
-                    else {
-                        db.collection("shopify_customers").updateOne({ customer_id: user_data.customer_id }, [{ $set: { counter: user_data.counter } }, { $set: { total: user_data.total } }]);
-                    }
-                });
             return current_customer
         }
         const user = getCustomerData()
