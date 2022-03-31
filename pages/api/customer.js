@@ -1,6 +1,6 @@
 import { connectToDatabase } from "../../lib/mongodb"
 
-export default function handler(req, res) {
+export default async function handler( req, res) {
     if (req.method === 'POST') {
         async function ShopifyData(query) {
             const URL = `https://cac-prototype.myshopify.com/admin/api/2022-01/graphql.json`
@@ -119,7 +119,7 @@ export default function handler(req, res) {
                 });
             return current_customer
         }
-        const user = getCustomerData()
+        const user = await getCustomerData()
         console.log("users", user)
     }
     else {
